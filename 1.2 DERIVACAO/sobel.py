@@ -75,8 +75,6 @@ def convolucao3x3(img, conv, w, h, b):
             m = np.multiply(masc, conv)
             v = np.sum(m)
             v = min(255, abs(v))
-            l = np.sum(conv)
-            v = v / l if l > 0 else v
             convolved_img[i, j] = v
             
             
@@ -104,18 +102,12 @@ def threshold(g, t):
     return final
 
 def label(img, t, w, h):
-    cv2.rectangle(img, (0,int(7*h/8),int(w),int(h/8)), (0,0,0), -1)
     cv2.putText(img, t, (8,int(7*h/8)+22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-    return img
 
 # Leitura da imagem de entrada
 img = cv2.imread('lena.png')
 
-#w = 300
-#h = 204
-
-w = 256
-h = 256
+h,w,_ = img.shape
 
 # Canal grayscale
 for i in range(h):
@@ -140,17 +132,17 @@ th = 150
 img6 = threshold(img5, th)
 
 # Labeling
-img = label(img, "P&B", w, h)
-img2 = label(img2, "Gaussiana", w, h)
-img3 = label(img3, "Sobel X", w, h)
-img4 = label(img4, "Sobel Y", w, h)
-img5 = label(img5, "Sobel X e Y", w, h)
-img6 = label(img6, "Threshold", w, h)
+label(img, "P&B", w, h)
+label(img2, "Gaussiana", w, h)
+label(img3, "Sobel X", w, h)
+label(img4, "Sobel Y", w, h)
+label(img5, "Sobel X e Y", w, h)
+label(img6, "Threshold", w, h)
 
 alg1 = np.concatenate((np.concatenate( (img, img2, img3), axis=1), np.concatenate( (img4, img5, img6), axis=1)), axis=0)
 
 data_u8 = alg1.astype('uint8')
-cv2.imshow('Algoritmo 1: Sobel 3x3', cv2.resize(data_u8, (768,512)))
+cv2.imshow('Algoritmo 1: Sobel 3x3', cv2.resize(data_u8, (w*3,h*2)))
  
 cv2.waitKey(0)
 cv2.destroyAllWindows()

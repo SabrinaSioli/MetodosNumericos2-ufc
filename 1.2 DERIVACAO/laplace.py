@@ -17,9 +17,9 @@ laplacian3x3 = np.array([
 ])
 laplacian3x3 = laplacian3x3 / 6
 
-erro = 0.15
+ERRO = 0.0001
 
-def convolucao3x3(img, conv, w, h, b):
+def convolucao3x3(img, conv, w, h):
 
     # Matriz nova
     convolved_img_1 = img.copy()
@@ -71,13 +71,12 @@ def convolucao3x3(img, conv, w, h, b):
             v = np.sum(m)
             v = min(255, v)
             l = np.sum(conv)
-            v = v / l if b and l > 0 else v
+            v = v / l if l > 0 else v
             convolved_img_1[i, j] = v
-            #convolved_img_2[i, j] = [0,0,0] if v < -erro or v > erro else [255,255,255]
             
     return convolved_img_1
 
-def lap3x3(img, conv, w, h, b):
+def lap3x3(img, conv, w, h, threshold):
 
     # Matriz nova
     convolved_img_1 = img.copy()
@@ -128,28 +127,18 @@ def lap3x3(img, conv, w, h, b):
 
             m = np.multiply(masc, conv)
             v = np.sum(m)
-            v = min(255, v)
-            l = np.sum(conv)
-            v = v / l if b and l > 0 else v
-            convolved_img_1[i, j] = abs(v + 128)
-            v = v / 100
-            convolved_img_2[i, j] = [0,0,0] if v >= -erro and v <= erro else [255,255,255]
+            convolved_img_1[i, j] = v + 128
+            convolved_img_2[i, j] = [0,0,0] if abs(v) < threshold else [255,255,255]
             
     return convolved_img_1, convolved_img_2
 
 def label(img, t, w, h):
-    cv2.rectangle(img, (0,int(7*h/8),int(w),int(h/8)), (0,0,0), -1)
     cv2.putText(img, t, (8,int(7*h/8)+22), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
-    return img
 
 # Leitura da imagem de entrada
 img = cv2.imread('lena.png')
 
-#w = 300
-#h = 204
-
-w = 256
-h = 256
+h,w,_ = img.shape
 
 # Canal grayscale
 for i in range(h):
@@ -157,22 +146,23 @@ for i in range(h):
         m1 = sum(img[i,j])/3
         img[i,j] = [m1,m1,m1]
 
+
 # Gaussiana
-img2 = convolucao3x3(img, blur, w, h, True)
+img2 = convolucao3x3(img, blur, w, h)
 
 # Laplacian
-img3, img4 = lap3x3(img2, laplacian3x3, w, h, False)
+img3, img4 = lap3x3(img2, laplacian3x3, w, h, 14)
 
 # Labeling
-img = label(img, "P&B", w, h)
-img2 = label(img2, "Gaussiana", w, h)
-img3 = label(img3, "Laplacian 0-->128", w, h)
-img4 = label(img4, "Threshold", w, h)
+label(img, "P&B", w, h)
+label(img2, "Gaussiana", w, h)
+label(img3, "Laplacian 0-->128", w, h)
+label(img4, "Threshold", w, h)
 
 alg2 = np.concatenate((img, img2, img3, img4), axis=1)
 
 data_u8 = alg2.astype('uint8')
-cv2.imshow('Algoritmo 2: Laplace 3x3', cv2.resize(data_u8, (1024,256)))
+cv2.imshow('Algoritmo 2: Laplace 3x3', cv2.resize(data_u8, (w*4,h)))
  
 cv2.waitKey(0)
 cv2.destroyAllWindows()

@@ -5,7 +5,7 @@
 import math
 
 def f(x):
-    return math.cos(x)
+    return (math.sin(2*x) + 4*(x**2) + 3*x)**2
 
 def NewtonCotes(xi, xf, fechada, grau):
 
@@ -39,13 +39,12 @@ def NewtonCotes(xi, xf, fechada, grau):
 
 
 
-print("Funcao: cos(x)")
+print("Funcao: (sen(2x) + 4x^2 + 3x)^2")
 print("Tolerancia: 10^-6\n")
-a = float(input("Inicio intervalo: "))
-b = float(input("Fim intervalo: "))
-grau = int(input("Grau: "))
-tipo = input("Aberta(0) ou Fechada(1)?: ")
-fechada = True if tipo=="1" else False
+a = 0.0
+b = 1.0
+grau = 4
+fechada = True
 
 iNova = float('inf')
 iVelha = 0
